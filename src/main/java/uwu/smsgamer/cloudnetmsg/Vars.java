@@ -26,9 +26,14 @@ public class Vars {
     // calling it load yaml just encase we use json as well
     public static void loadYaml(File dataFolder) {
         try {
-            Configuration config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(dataFolder, "config.yml"));
+            File file = new File(dataFolder, "config.yml");
+            Configuration config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
             Configuration msgs = config.getSection("messages");
             // probably not best way to do it but idfc I think it works (if it doesn't I'll do it another way)
+            // sets the variable to the string in the config with a default of
+            // that variable (so if it doesn't exist, just defaults to itself)
+            // and then sets that in the config (because if it doesn't exist,
+            // then it won't save on disk, so we set it to that and then we save)
             msgs.set("toMSG", toMSG = msgs.getString("toMSG", toMSG));
             msgs.set("fromMSG", fromMSG = msgs.getString("fromMSG", fromMSG));
             msgs.set("disabledMSG", disabledMSG = msgs.getString("disabledMSG", disabledMSG));
@@ -43,6 +48,7 @@ public class Vars {
             msgs.set("replyNoLast", replyNoLast = msgs.getString("replyNoLast", replyNoLast));
             msgs.set("usageReply", usageReply = msgs.getString("usageReply", usageReply));
             msgs.set("usageMsg", usageMsg = msgs.getString("usageMsg", usageMsg));
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
         } catch (IOException e) {
             e.printStackTrace();
         }
