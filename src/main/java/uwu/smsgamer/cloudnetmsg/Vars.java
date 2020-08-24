@@ -26,7 +26,11 @@ public class Vars {
     // calling it load yaml just encase we use json as well
     public static void loadYaml(File dataFolder) {
         try {
+            if (!dataFolder.exists())
+                dataFolder.mkdirs();
             File file = new File(dataFolder, "config.yml");
+            if (!file.exists())
+                file.createNewFile();
             Configuration config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
             Configuration msgs = config.getSection("messages");
             // probably not best way to do it but idfc I think it works (if it doesn't I'll do it another way)

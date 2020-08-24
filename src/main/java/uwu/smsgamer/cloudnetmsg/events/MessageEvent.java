@@ -22,7 +22,8 @@ public class MessageEvent extends Event {
         this.type = type;
     }
 
-    public MessageEvent(String message) {
+    public MessageEvent(String sender, String message) {
+        this.sender = sender;
         this.message = message;
         this.type = Type.BROADCAST;
     }

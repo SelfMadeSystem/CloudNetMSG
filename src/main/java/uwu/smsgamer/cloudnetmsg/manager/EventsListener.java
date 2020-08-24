@@ -11,6 +11,8 @@ import net.md_5.bungee.event.EventHandler;
 import uwu.smsgamer.cloudnetmsg.*;
 import uwu.smsgamer.cloudnetmsg.events.MessageEvent;
 
+import java.util.Arrays;
+
 public class EventsListener implements Listener {
     @EventHandler
     public void onJoin(PostLoginEvent event) {
@@ -29,12 +31,16 @@ public class EventsListener implements Listener {
         if (event.getMessage().startsWith("/")) {// TODO: 2020-08-24 admin commands like reload
             String msg = event.getMessage();
             int indexOf = msg.indexOf(" ");
-            String cmd = msg.substring(1).substring(0, indexOf < 0 ? msg.length() - 1 : indexOf);
+            String cmd = msg.substring(1).substring(0, indexOf < 0 ? msg.length() - 1 : indexOf).trim();
             String rawArgs = msg.substring(indexOf + 1);
-            String[] args = rawArgs.split(" ");
+            String[] args;
+            if (indexOf != -1)
+                args = rawArgs.split(" ");
+            else
+                args = new String[0];
             switch (cmd.toLowerCase()) {
                 case "reply":
-                case "r":
+                case "r": {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
                         if (args.length == 0) {
@@ -48,21 +54,23 @@ public class EventsListener implements Listener {
                         player.sendMSG(player.lastMsg, rawArgs);
                     }
                     break;
+                }
                 case "w":
                 case "pm":
-                case "msg":
+                case "msg": {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
                         if (args.length <= 1) {
                             ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageMsg, player.getName(), cmd)));
                             break;
                         }
-                        String rawArgs1 = rawArgs.substring(msg.indexOf(" ") + 1);
+                        String rawArgs1 = rawArgs.substring(rawArgs.indexOf(" ") + 1);
                         player.sendMSG(args[0], rawArgs1);
                     }
                     break;
+                }
                 case "gc":
-                case "globalchat":
+                case "globalchat": {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
                         if (args.length == 0) {
@@ -75,10 +83,11 @@ public class EventsListener implements Listener {
                         }
                         CloudNetDriver.getInstance().getEventManager().callEvent(
                           new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
-                    } else
-                        break;
+                    }
+                    break;
+                }
                 case "bc":
-                case "broadcast":
+                case "broadcast": {
                     // TODO: 2020-08-24 maybe have
                     //  /bc Broadcast in survival only! --servers Survival
                     //  or
@@ -90,11 +99,12 @@ public class EventsListener implements Listener {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.broadcast")) {
                         CloudNetDriver.getInstance().getEventManager().callEvent(
-                          new MessageEvent(String.join(" ", args)));
+                          new MessageEvent(player.getName(), String.join(" ", args)));
                     }
                     break;
+                }
                 case "sc":
-                case "staffchat":
+                case "staffchat": {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.staffchat")) {
                         if (args.length == 0) {
@@ -102,13 +112,14 @@ public class EventsListener implements Listener {
                                 ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.scOff, player.getName(), cmd)));
                             else
                                 ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.scOn, player.getName(), cmd)));
-                            player.enableGCChat = !player.enableGCChat;
+                            player.enableSC = !player.enableSC;
                             break;
                         }
                         CloudNetDriver.getInstance().getEventManager().callEvent(
                           new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT));
                     }
                     break;
+                }
             }
         } else {// TODO: 2020-08-24 .-. finish this
             if (player.enableSC) {
@@ -125,7 +136,7 @@ public class EventsListener implements Listener {
             case MSG: {
                 CPlayer player = PlayerManager.getPlayer(event.receiver);
                 if (player != null) {
-                    player.getMSG(event.sender, event.message);
+                    event.returnType = player.getMSG(event.sender, event.message);
                 }
                 break;
             }

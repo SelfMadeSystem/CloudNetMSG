@@ -1,5 +1,6 @@
 package uwu.smsgamer.cloudnetmsg.manager;
 
+import de.dytanic.cloudnet.driver.CloudNetDriver;
 import net.md_5.bungee.api.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import uwu.smsgamer.cloudnetmsg.*;
@@ -23,6 +24,8 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
 
     public void sendMSG(String player, String message) {
         MessageEvent messageEvent = new MessageEvent(getName(), player, message, MessageEvent.Type.MSG);
+        CloudNetDriver.getInstance().getEventManager().callEvent(messageEvent);
+
         switch (messageEvent.returnType) {
             case -1:
                 sender.sendMessage(new TextComponent(ChatColor.RED + "An unknown error has occurred. Please contact development " +
