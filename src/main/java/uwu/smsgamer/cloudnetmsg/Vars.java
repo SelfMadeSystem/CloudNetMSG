@@ -1,6 +1,6 @@
 package uwu.smsgamer.cloudnetmsg;
 
-public class Vars {
+public class Vars { // TODO: 2020-08-23 Config Manager And Shit Ok This Is Just Temp Pls Dont Kill Me
     public static String noPlayer = "&cThat player does not exist.";
     public static String toMSG = "&b&lYOU&r -> %receiver%: &r%msg%";
     public static String fromMSG = "%sender% -> &b&lYOU&r: %msg%";
