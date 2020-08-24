@@ -45,7 +45,7 @@ public class EventsListener implements Listener {
                 case "reply":
                 case "r": {
                     event.setCancelled(true);
-                    if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
+                    //if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
                         if (args.length == 0) {
                             ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageReply, player.getName(), cmd)));
                             break;
@@ -55,7 +55,7 @@ public class EventsListener implements Listener {
                             break;
                         }
                         player.sendMSG(player.lastMsg, rawArgs);
-                    }
+                    //}
                     break;
                 }
                 case "w":
@@ -63,33 +63,62 @@ public class EventsListener implements Listener {
                 case "pm":
                 case "msg": {
                     event.setCancelled(true);
-                    if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
+                    //if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
                         if (args.length <= 1) {
                             ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageMsg, player.getName(), cmd)));
                             break;
                         }
                         String rawArgs1 = rawArgs.substring(rawArgs.indexOf(" ") + 1);
                         player.sendMSG(args[0], rawArgs1);
-                    }
+                    //}
                     break;
                 }
                 case "gc":
                 case "globalchat": {
                     event.setCancelled(true);
-                    if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
+                    //if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
                         if (args.length == 0) {
-                            if (player.enableGCChat)
+                            if (player.enableGC)
                                 ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOff, player.getName(), cmd)));
                             else
                                 ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOn, player.getName(), cmd)));
-                            player.enableGCChat = !player.enableGCChat;
+                            player.enableGC = !player.enableGC;
                             break;
                         }
                         CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "globalchat",
                           JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
 //                        CloudNetDriver.getInstance().getEventManager().callEvent(
 //                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
+                    //}
+                    break;
+                }
+                case "gct":
+                case "gctoggle":
+                case "globalchattoggle": {
+                    event.setCancelled(true);
+                    if (args.length == 0) {
+                        if (player.enableGCChat)
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOffMsg, player.getName(), cmd)));
+                        else
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOnMsg, player.getName(), cmd)));
+                        player.enableGCChat = !player.enableGCChat;
+                        break;
                     }
+                    boolean on = false;
+                    switch (args[0].toLowerCase()) {
+                        case "yes":
+                        case "on":
+                        case "true":
+                            on = true;
+                            break;
+                        case "toggle":
+                            on = !player.enableGCChat;
+                    }
+                    if (on)
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOnMsg, player.getName(), cmd)));
+                    else
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOffMsg, player.getName(), cmd)));
+                    player.enableGCChat = on;
                     break;
                 }
                 case "bc":
@@ -131,10 +160,14 @@ public class EventsListener implements Listener {
                     break;
                 }
             }
-        } else {// TODO: 2020-08-24 .-. finish this
+        } else {
             if (player.enableSC) {
                 event.setCancelled(true);
-            } else if (player.enableGCChat) {
+                CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "staffchat",
+                  JsonDocument.newDocument().append("message", event.getMessage()).append("sender", player.getName()));
+            } else if (player.enableGCChat && player.enableGC) {
+                CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "globalchat",
+                  JsonDocument.newDocument().append("message", event.getMessage()).append("sender", player.getName()));
                 event.setCancelled(true);
             }
         }
@@ -192,7 +225,7 @@ public class EventsListener implements Listener {
                     PlayerManager.otherPlayers.remove(msg);
                     break;
                 }
-                case "pdisablemsg": {
+                case "pdisablemsg": {// TODO: 2020-08-24 don't do this and instead have a send player message thing.
                     String receiver = data.getString("receiver");
                     CPlayer sender = PlayerManager.getPlayer(data.getString("sender"));
                     if (sender != null)

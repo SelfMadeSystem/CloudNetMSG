@@ -11,6 +11,8 @@ public class Vars {
     public static String broadcast = "&c[&l&4Broadcast&c]  &6%msg%";
     public static String staffChat = "&7[&6SC&7]&r %sender%  &r%msg%";
     public static String globalChat = "&7[&bGlobal&7]&r %sender%  &r%msg%";
+    public static String gcOnMsg = "Global chat for each message &aenabled&r.";
+    public static String gcOffMsg = "Global chat for each message &cdisabled&r.";
     public static String gcOn = "Global chat &aenabled&r.";
     public static String gcOff = "Global chat &cdisabled&r.";
     public static String scOn = "Staff chat &aenabled&r.";

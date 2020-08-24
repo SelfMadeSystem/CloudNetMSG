@@ -26,6 +26,7 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
         if (PlayerManager.playerExists(player)) {
             CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "message",
               JsonDocument.newDocument().append("message", message).append("sender", getName()).append("receiver", player));
+            // TODO: 2020-08-24 don't do this and instead have a send player message thing.
             sender.sendMessage(new TextComponent(StrU.messaging(Vars.toMSG, getName(), player, message)));
             lastMsg = player;
         } else {
