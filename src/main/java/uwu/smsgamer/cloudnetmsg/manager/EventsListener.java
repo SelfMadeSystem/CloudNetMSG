@@ -24,21 +24,85 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onChat(ChatEvent event) {
         CPlayer player = PlayerManager.getPlayer(((ProxiedPlayer) event.getSender()).getName());
+        assert player != null;
         if (event.getMessage().startsWith("/")) {
             String msg = event.getMessage();
             int indexOf = msg.indexOf(" ");
             String cmd = msg.substring(1).substring(0, indexOf < 0 ? msg.length() - 1 : indexOf);
+            String rawArgs = msg.substring(indexOf + 1);
+            String[] args = rawArgs.split(" ");
             switch (cmd.toLowerCase()) {
                 case "reply":
                 case "r":
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
+                        if (args.length == 0) {
+                            StrU.usage(Vars.usageReply, player.getName(), cmd);
+                            break;
+                        }
+                        if (player.lastMsg == null || player.lastMsg.isEmpty()) {
+                            StrU.usage(Vars.replyNoLast, player.getName(), cmd);
+                            break;
+                        }
+                        player.sendMSG(player.lastMsg, rawArgs);
+                    }
                     break;
                 case "w":
+                case "pm":
                 case "msg":
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
+                        if (args.length <= 1) {
+                            StrU.usage(Vars.usageMsg, player.getName(), cmd);
+                            break;
+                        }
+                        String rawArgs1 = rawArgs.substring(msg.indexOf(" ") + 1);
+                        player.sendMSG(args[0], rawArgs1);
+                    }
+                    break;
+                case "gc":
+                case "globalchat":
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
+                        if (args.length == 0) {
+                            if (player.enableGCChat)
+                                StrU.usage(Vars.gcOff, player.getName(), cmd);
+                            else
+                                StrU.usage(Vars.gcOn, player.getName(), cmd);
+                            player.enableGCChat = !player.enableGCChat;
+                            break;
+                        }
+                        new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT);
+                    } else
+                        break;
+                case "bc":
+                case "broadcast":
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.broadcast")) {
+                        new MessageEvent(String.join(" ", args));
+                    }
+                    break;
+                case "sc":
+                case "staffchat":
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.staffchat")) {
+                        if (args.length == 0) {
+                            if (player.enableSC)
+                                StrU.usage(Vars.scOff, player.getName(), cmd);
+                            else
+                                StrU.usage(Vars.scOn, player.getName(), cmd);
+                            player.enableGCChat = !player.enableGCChat;
+                            break;
+                        }
+                        new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT);
+                    }
                     break;
             }
         } else {
             if (player.enableSC) {
-            } else if (player.enableGC) {
+                event.setCancelled(true);
+            } else if (player.enableGCChat) {
+                event.setCancelled(true);
             }
         }
     }
@@ -54,13 +118,13 @@ public class EventsListener implements Listener {
                 break;
             }
             case BROADCAST: {
-                String msg = StrU.replaceString(Vars.broadcast, event.sender, "%receiver%", event.message);
+                String msg = StrU.messaging(Vars.broadcast, event.sender, "%receiver%", event.message);
                 for (ProxiedPlayer p : ProxyServer.getInstance().getPlayers())
                     p.sendMessage(new TextComponent(msg.replace("%receiver%", p.getName())));
                 break;
             }
             case STAFF_CHAT: {
-                String msg = StrU.replaceString(Vars.staffChat, event.sender, "%receiver%", event.message);
+                String msg = StrU.messaging(Vars.staffChat, event.sender, "%receiver%", event.message);
                 for (CPlayer player : PlayerManager.playerHashMap.values()) {
                     if (player.sender.hasPermission("cloudnetmsg.staffchat"))
                         player.sender.sendMessage(new TextComponent(msg));
@@ -68,7 +132,7 @@ public class EventsListener implements Listener {
                 break;
             }
             case GLOBAL_CHAT: {
-                String msg = StrU.replaceString(Vars.globalChat, event.sender, "%receiver%", event.message);
+                String msg = StrU.messaging(Vars.globalChat, event.sender, "%receiver%", event.message);
                 for (CPlayer player : PlayerManager.playerHashMap.values()) {
                     if (player.enableGC)
                         player.sender.sendMessage(new TextComponent(msg));

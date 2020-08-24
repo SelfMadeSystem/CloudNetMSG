@@ -24,6 +24,7 @@ public class MessageEvent extends Event {
 
     public MessageEvent(String message) {
         this.message = message;
+        this.type = Type.BROADCAST;
     }
 
     @Override
@@ -32,8 +33,8 @@ public class MessageEvent extends Event {
     }
 
     public enum Type {
-        MSG, //REPLY
-        BROADCAST, //Just msg
+        MSG,
+        BROADCAST,
         STAFF_CHAT,
         GLOBAL_CHAT
     }

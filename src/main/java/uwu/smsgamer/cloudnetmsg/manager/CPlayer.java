@@ -29,21 +29,21 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
                   "to resolve this issue or look at console if a developer."));
                 break;
             case 0:
-                sender.sendMessage(new TextComponent(StrU.replaceString(Vars.noPlayer, getName(), player, message)));
+                sender.sendMessage(new TextComponent(StrU.messaging(Vars.noPlayer, getName(), player, message)));
                 break;
             case 1:
-                sender.sendMessage(new TextComponent(StrU.replaceString(Vars.toMSG, getName(), player, message)));
+                sender.sendMessage(new TextComponent(StrU.messaging(Vars.toMSG, getName(), player, message)));
                 lastMsg = player;
                 break;
             case 2:
-                sender.sendMessage(new TextComponent(StrU.replaceString(Vars.disabledMSG, getName(), player, message)));
+                sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, getName(), player, message)));
                 break;
         }
     }
 
     public int getMSG(String player, String message) {
         if (enableMSGs) {
-            sender.sendMessage(new TextComponent(StrU.replaceString(Vars.fromMSG, player, getName(), message)));
+            sender.sendMessage(new TextComponent(StrU.messaging(Vars.fromMSG, player, getName(), message)));
             return 1;
         } else return 2;
     }
