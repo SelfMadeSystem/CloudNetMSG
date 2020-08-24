@@ -1,0 +1,39 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: 'java'
+
+group = 'uwu.smsgamer'
+version = '1.0'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = "loudnet-releases"
+        url = "https://repo.cloudnetservice.eu/repository/releases"
+    }
+}
+
+dependencies {
+    compileOnly 'net.md-5:bungeecord-api:1.16-R0.2-SNAPSHOT'
+    // compileOnly 'de.dytanic.cloudnet:cloudnet:3.3.0-RELEASE'
+    compileOnly 'de.dytanic.cloudnet:cloudnet-driver:3.3.0-RELEASE'
+    compileOnly 'de.dytanic.cloudnet:cloudnet-wrapper-jvm:3.3.0-RELEASE'
+    compileOnly 'de.dytanic.cloudnet:cloudnet-syncproxy:3.3.0-RELEASE'
+    compileOnly 'de.dytanic.cloudnet:cloudnet-bridge:3.3.0-RELEASE'
+
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}

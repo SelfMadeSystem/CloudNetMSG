@@ -1,0 +1,4 @@
+name: CloudNetMSG
+version: @version@
+main: uwu.smsgamer.cloudnetmsg.CloudNetMSG
+description: Messaging for CloudNet
