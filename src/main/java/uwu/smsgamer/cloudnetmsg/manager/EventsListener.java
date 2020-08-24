@@ -1,7 +1,9 @@
 package uwu.smsgamer.cloudnetmsg.manager;
 
+import de.dytanic.cloudnet.common.document.gson.JsonDocument;
 import de.dytanic.cloudnet.driver.CloudNetDriver;
 import de.dytanic.cloudnet.driver.event.EventListener;
+import de.dytanic.cloudnet.driver.event.events.channel.ChannelMessageReceiveEvent;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -9,19 +11,20 @@ import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import uwu.smsgamer.cloudnetmsg.*;
-import uwu.smsgamer.cloudnetmsg.events.MessageEvent;
-
-import java.util.Arrays;
 
 public class EventsListener implements Listener {
     @EventHandler
     public void onJoin(PostLoginEvent event) {
-        PlayerManager.playerHashMap.put(event.getPlayer().getName(), new CPlayer(event.getPlayer()));
+        PlayerManager.playerHashMap.put(event.getPlayer().getName().toLowerCase(), new CPlayer(event.getPlayer()));
+        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "pjoin",
+          JsonDocument.newDocument().append("message", event.getPlayer().getName()));
     }
 
     @EventHandler
     public void onQuit(PlayerDisconnectEvent event) {
-        PlayerManager.playerHashMap.remove(event.getPlayer().getName());
+        PlayerManager.playerHashMap.remove(event.getPlayer().getName().toLowerCase());
+        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "pquit",
+          JsonDocument.newDocument().append("message", event.getPlayer().getName()));
     }
 
     @EventHandler
@@ -56,6 +59,7 @@ public class EventsListener implements Listener {
                     break;
                 }
                 case "w":
+                case "tell":
                 case "pm":
                 case "msg": {
                     event.setCancelled(true);
@@ -81,8 +85,10 @@ public class EventsListener implements Listener {
                             player.enableGCChat = !player.enableGCChat;
                             break;
                         }
-                        CloudNetDriver.getInstance().getEventManager().callEvent(
-                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
+                        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "globalchat",
+                          JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
+//                        CloudNetDriver.getInstance().getEventManager().callEvent(
+//                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
                     }
                     break;
                 }
@@ -98,8 +104,10 @@ public class EventsListener implements Listener {
                     //  /bc Broadcast not in lobby or survival! --no-servers Lobby Survival
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.broadcast")) {
-                        CloudNetDriver.getInstance().getEventManager().callEvent(
-                          new MessageEvent(player.getName(), String.join(" ", args)));
+                        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "broadcast",
+                          JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
+//                        CloudNetDriver.getInstance().getEventManager().callEvent(
+//                          new MessageEvent(player.getName(), String.join(" ", args)));
                     }
                     break;
                 }
@@ -115,8 +123,10 @@ public class EventsListener implements Listener {
                             player.enableSC = !player.enableSC;
                             break;
                         }
-                        CloudNetDriver.getInstance().getEventManager().callEvent(
-                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT));
+                        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "staffchat",
+                          JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
+//                        CloudNetDriver.getInstance().getEventManager().callEvent(
+//                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT));
                     }
                     break;
                 }
@@ -131,6 +141,71 @@ public class EventsListener implements Listener {
     }
 
     @EventListener
+    public void handleChannelMessage(ChannelMessageReceiveEvent event) {
+        if (event.getChannel().equals("cloudnetmsg")) {
+            JsonDocument data = event.getData();
+            String msg = data.getString("message");
+            switch (event.getMessage().toLowerCase()) {
+                case "message": {
+                    String sender = data.getString("sender");
+                    CPlayer receiver = PlayerManager.getPlayer(data.getString("receiver"));
+                    if (receiver != null) {
+                        if (receiver.getMSG(sender, msg))
+                            CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "staffchat",
+                              JsonDocument.newDocument().append("message", msg).append("sender", sender).append("receiver", receiver.getName()));
+                    }
+                    break;
+                }
+                case "globalchat": {
+                    String sender = data.getString("sender");
+                    msg = StrU.messaging(Vars.globalChat, sender, "%receiver%", msg);
+                    for (CPlayer player : PlayerManager.playerHashMap.values()) {
+                        if (player.enableGC)
+                            player.sender.sendMessage(new TextComponent(msg));
+                    }
+                    break;
+                }
+                case "staffchat": {
+                    String sender = data.getString("sender");
+                    msg = StrU.messaging(Vars.staffChat, sender, "%receiver%", msg);
+                    for (CPlayer player : PlayerManager.playerHashMap.values()) {
+                        if (player.sender.hasPermission("cloudnetmsg.staffchat"))
+                            player.sender.sendMessage(new TextComponent(msg));
+                    }
+                    break;
+                }
+                case "broadcast": {
+                    String sender = data.getString("sender");
+                    msg = StrU.messaging(Vars.broadcast, sender, "%receiver%", msg);
+                    for (ProxiedPlayer p : ProxyServer.getInstance().getPlayers())
+                        p.sendMessage(new TextComponent(msg.replace("%receiver%", p.getName())));
+                    break;
+                }
+                case "pjoin": {
+                    msg = msg.toLowerCase();
+                    if (!PlayerManager.playerHashMap.containsKey(msg))
+                        PlayerManager.otherPlayers.add(msg);
+                    break;
+                }
+                case "pquit": {
+                    msg = msg.toLowerCase();
+                    PlayerManager.otherPlayers.remove(msg);
+                    break;
+                }
+                case "pdisablemsg": {
+                    String receiver = data.getString("receiver");
+                    CPlayer sender = PlayerManager.getPlayer(data.getString("sender"));
+                    if (sender != null)
+                        sender.sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, sender.getName(), receiver, msg)));
+                    break;
+                }
+                default:
+                    throw new IllegalArgumentException("HandleChannelMessage's message in CloudNetMSG is: " + msg);
+            }
+        }
+    }
+
+    /*@EventListener
     public void onMSG(MessageEvent event) {
         switch (event.type) {
             case MSG: {
@@ -163,5 +238,5 @@ public class EventsListener implements Listener {
                 break;
             }
         }
-    }
+    }*/
 }

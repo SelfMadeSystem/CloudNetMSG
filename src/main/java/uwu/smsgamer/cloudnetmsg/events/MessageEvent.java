@@ -1,3 +1,4 @@
+/*
 package uwu.smsgamer.cloudnetmsg.events;
 
 import de.dytanic.cloudnet.driver.event.*;
@@ -40,3 +41,4 @@ public class MessageEvent extends Event {
         GLOBAL_CHAT
     }
 }
+*/

@@ -1,10 +1,10 @@
 package uwu.smsgamer.cloudnetmsg.manager;
 
+import de.dytanic.cloudnet.common.document.gson.JsonDocument;
 import de.dytanic.cloudnet.driver.CloudNetDriver;
 import net.md_5.bungee.api.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import uwu.smsgamer.cloudnetmsg.*;
-import uwu.smsgamer.cloudnetmsg.events.MessageEvent;
 
 public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names chat colour nicks prefixes suffixes you know the drill oki doki
     public CommandSender sender; // instance of the sender associated w/ this
@@ -23,7 +23,15 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
     }
 
     public void sendMSG(String player, String message) {
-        MessageEvent messageEvent = new MessageEvent(getName(), player, message, MessageEvent.Type.MSG);
+        if (PlayerManager.playerExists(player)) {
+            CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "message",
+              JsonDocument.newDocument().append("message", message).append("sender", getName()).append("receiver", player));
+            sender.sendMessage(new TextComponent(StrU.messaging(Vars.toMSG, getName(), player, message)));
+            lastMsg = player;
+        } else {
+            sender.sendMessage(new TextComponent(StrU.messaging(Vars.noPlayer, getName(), player, message)));
+        }
+        /*MessageEvent messageEvent = new MessageEvent(getName(), player, message, MessageEvent.Type.MSG);
         CloudNetDriver.getInstance().getEventManager().callEvent(messageEvent);
 
         switch (messageEvent.returnType) {
@@ -41,13 +49,15 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
             case 2:
                 sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, getName(), player, message)));
                 break;
-        }
+        }*/
     }
 
-    public int getMSG(String player, String message) {
+    public boolean getMSG(String player, String message) {
         if (enableMSGs) {
             sender.sendMessage(new TextComponent(StrU.messaging(Vars.fromMSG, player, getName(), message)));
-            return 1;
-        } else return 2;
+            lastMsg = player;
+            return false;
+        }
+        return true;
     }
 }
