@@ -1,5 +1,6 @@
 package uwu.smsgamer.cloudnetmsg.manager;
 
+import de.dytanic.cloudnet.driver.CloudNetDriver;
 import de.dytanic.cloudnet.driver.event.EventListener;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -25,7 +26,7 @@ public class EventsListener implements Listener {
     public void onChat(ChatEvent event) {
         CPlayer player = PlayerManager.getPlayer(((ProxiedPlayer) event.getSender()).getName());
         assert player != null;
-        if (event.getMessage().startsWith("/")) {
+        if (event.getMessage().startsWith("/")) {// TODO: 2020-08-24 admin commands like reload
             String msg = event.getMessage();
             int indexOf = msg.indexOf(" ");
             String cmd = msg.substring(1).substring(0, indexOf < 0 ? msg.length() - 1 : indexOf);
@@ -37,11 +38,11 @@ public class EventsListener implements Listener {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
                         if (args.length == 0) {
-                            StrU.usage(Vars.usageReply, player.getName(), cmd);
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageReply, player.getName(), cmd)));
                             break;
                         }
                         if (player.lastMsg == null || player.lastMsg.isEmpty()) {
-                            StrU.usage(Vars.replyNoLast, player.getName(), cmd);
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.replyNoLast, player.getName(), cmd)));
                             break;
                         }
                         player.sendMSG(player.lastMsg, rawArgs);
@@ -53,7 +54,7 @@ public class EventsListener implements Listener {
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
                         if (args.length <= 1) {
-                            StrU.usage(Vars.usageMsg, player.getName(), cmd);
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageMsg, player.getName(), cmd)));
                             break;
                         }
                         String rawArgs1 = rawArgs.substring(msg.indexOf(" ") + 1);
@@ -66,20 +67,30 @@ public class EventsListener implements Listener {
                     if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
                         if (args.length == 0) {
                             if (player.enableGCChat)
-                                StrU.usage(Vars.gcOff, player.getName(), cmd);
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOff, player.getName(), cmd)));
                             else
-                                StrU.usage(Vars.gcOn, player.getName(), cmd);
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOn, player.getName(), cmd)));
                             player.enableGCChat = !player.enableGCChat;
                             break;
                         }
-                        new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT);
+                        CloudNetDriver.getInstance().getEventManager().callEvent(
+                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
                     } else
                         break;
                 case "bc":
                 case "broadcast":
+                    // TODO: 2020-08-24 maybe have
+                    //  /bc Broadcast in survival only! --servers Survival
+                    //  or
+                    //  /bc Broadcast in survival and lobby! --servers Survival Lobby
+                    //  or
+                    //  /bc Broadcast not in lobby! --no-servers Lobby
+                    //  or
+                    //  /bc Broadcast not in lobby or survival! --no-servers Lobby Survival
                     event.setCancelled(true);
                     if (player.sender.hasPermission("cloudnetmsg.commands.broadcast")) {
-                        new MessageEvent(String.join(" ", args));
+                        CloudNetDriver.getInstance().getEventManager().callEvent(
+                          new MessageEvent(String.join(" ", args)));
                     }
                     break;
                 case "sc":
@@ -88,17 +99,18 @@ public class EventsListener implements Listener {
                     if (player.sender.hasPermission("cloudnetmsg.commands.staffchat")) {
                         if (args.length == 0) {
                             if (player.enableSC)
-                                StrU.usage(Vars.scOff, player.getName(), cmd);
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.scOff, player.getName(), cmd)));
                             else
-                                StrU.usage(Vars.scOn, player.getName(), cmd);
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.scOn, player.getName(), cmd)));
                             player.enableGCChat = !player.enableGCChat;
                             break;
                         }
-                        new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT);
+                        CloudNetDriver.getInstance().getEventManager().callEvent(
+                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT));
                     }
                     break;
             }
-        } else {
+        } else {// TODO: 2020-08-24 .-. finish this
             if (player.enableSC) {
                 event.setCancelled(true);
             } else if (player.enableGCChat) {
