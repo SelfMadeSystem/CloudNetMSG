@@ -31,7 +31,7 @@ public class EventsListener implements Listener {
     public void onChat(ChatEvent event) {
         CPlayer player = PlayerManager.getPlayer(((ProxiedPlayer) event.getSender()).getName());
         assert player != null;
-        if (event.getMessage().startsWith("/")) {// TODO: 2020-08-24 admin commands like reload
+        if (event.getMessage().startsWith("/")) {
             String msg = event.getMessage();
             int indexOf = msg.indexOf(" ");
             String cmd = msg.substring(1).substring(0, indexOf < 0 ? msg.length() - 1 : indexOf).trim();
@@ -42,6 +42,14 @@ public class EventsListener implements Listener {
             else
                 args = new String[0];
             switch (cmd.toLowerCase()) {
+                case "cnmsgr":
+                case "cnmsgreload":
+                case "cloudnetmsgreload": {
+                    if (player.sender.hasPermission("cloudnetmsg.commands.reload")) {
+                        Vars.loadYaml(Vars.dataFolder);
+                        player.sender.sendMessage(new TextComponent("Reloaded config."));
+                    }
+                }
                 case "reply":
                 case "r": {
                     event.setCancelled(true);
@@ -184,8 +192,13 @@ public class EventsListener implements Listener {
                     CPlayer receiver = PlayerManager.getPlayer(data.getString("receiver"));
                     if (receiver != null) {
                         if (receiver.getMSG(sender, msg))
-                            CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "staffchat",
-                              JsonDocument.newDocument().append("message", msg).append("sender", sender).append("receiver", receiver.getName()));
+                            CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "msgplayer",
+                              JsonDocument.newDocument().append("message", StrU.messaging(Vars.disabledMSG, sender, receiver.getName(), msg))
+                                .append("receiver", receiver.getName()));
+                        else
+                            CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "msgplayer",
+                              JsonDocument.newDocument().append("message", StrU.messaging(Vars.toMSG, sender, receiver.getName(), msg))
+                                .append("receiver", receiver.getName()));
                     }
                     break;
                 }
@@ -225,11 +238,12 @@ public class EventsListener implements Listener {
                     PlayerManager.otherPlayers.remove(msg);
                     break;
                 }
-                case "pdisablemsg": {// TODO: 2020-08-24 don't do this and instead have a send player message thing.
-                    String receiver = data.getString("receiver");
-                    CPlayer sender = PlayerManager.getPlayer(data.getString("sender"));
+                case "msgplayer": {
+                    CPlayer receiver = PlayerManager.getPlayer(data.getString("receiver"));
+                    receiver.sender.sendMessage(new TextComponent(msg));
+                    /*CPlayer sender = PlayerManager.getPlayer(data.getString("sender"));
                     if (sender != null)
-                        sender.sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, sender.getName(), receiver, msg)));
+                        sender.sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, sender.getName(), receiver, msg)));*/
                     break;
                 }
                 default:

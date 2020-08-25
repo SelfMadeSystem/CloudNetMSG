@@ -24,13 +24,15 @@ public class Vars {
 
     public static String usageReply = "Replies to last player you messaged. Usage: /%cmd% (msg).";
     public static String usageMsg = "Messages someone. Can be on another sub server. Usage: /%cmd% (player) (msg).";
+    public static File dataFolder;
 
     // calling it load yaml just encase we use json as well
-    public static void loadYaml(File dataFolder) {
+    public static void loadYaml(File df) {
         try {
-            if (!dataFolder.exists())
-                dataFolder.mkdirs();
-            File file = new File(dataFolder, "config.yml");
+            dataFolder = df;
+            if (!df.exists())
+                df.mkdirs();
+            File file = new File(df, "config.yml");
             if (!file.exists())
                 file.createNewFile();
             Configuration config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
