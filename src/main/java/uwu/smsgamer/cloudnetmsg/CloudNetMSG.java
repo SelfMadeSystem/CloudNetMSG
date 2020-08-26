@@ -2,7 +2,7 @@ package uwu.smsgamer.cloudnetmsg;
 
 import de.dytanic.cloudnet.driver.CloudNetDriver;
 import net.md_5.bungee.api.plugin.Plugin;
-import uwu.smsgamer.cloudnetmsg.manager.EventsListener;
+import uwu.smsgamer.cloudnetmsg.manager.*;
 
 public final class CloudNetMSG extends Plugin {
 
@@ -13,6 +13,7 @@ public final class CloudNetMSG extends Plugin {
         Vars.loadYaml(this.getDataFolder());
         this.getProxy().getPluginManager().registerListener(this, listener);
         CloudNetDriver.getInstance().getEventManager().registerListener(listener);
+        PlayerManager.setup();
     }
 
     @Override
