@@ -8,15 +8,19 @@ public class Vars {
     public static String toMSG = "&b&lYOU&r -> %receiver%: &r%msg%";
     public static String fromMSG = "%sender% -> &b&lYOU&r: %msg%";
     public static String disabledMSG = "%receiver%&c has disabled messages.";
+
     public static String broadcast = "&c[&l&4Broadcast&c]  &6%msg%";
     public static String staffChat = "&7[&6SC&7]&r %sender%  &r%msg%";
     public static String globalChat = "&7[&bGlobal&7]&r %sender%  &r%msg%";
+
     public static String gcOnMsg = "Global chat for each message &aenabled&r.";
     public static String gcOffMsg = "Global chat for each message &cdisabled&r.";
+
     public static String gcOn = "Global chat &aenabled&r.";
     public static String gcOff = "Global chat &cdisabled&r.";
     public static String scOn = "Staff chat &aenabled&r.";
     public static String scOff = "Staff chat &cdisabled&r.";
+
     public static String csOn = "ChatSpy &aenabled&r.";
     public static String csOff = "ChatSpy &cdisabled&r.";
     public static String chatSpy = "&6Chat&eSpy&7>&r %sender%&r -> %receiver%&r %msg%";
@@ -49,15 +53,28 @@ public class Vars {
             msgs.set("toMSG", toMSG = msgs.getString("toMSG", toMSG));
             msgs.set("fromMSG", fromMSG = msgs.getString("fromMSG", fromMSG));
             msgs.set("disabledMSG", disabledMSG = msgs.getString("disabledMSG", disabledMSG));
+
             msgs.set("broadcast", broadcast = msgs.getString("broadcast", broadcast));
             msgs.set("staffChat", staffChat = msgs.getString("staffChat", staffChat));
             msgs.set("globalChat", globalChat = msgs.getString("globalChat", globalChat));
+
+            msgs.set("gcOnMsg", gcOnMsg = msgs.getString("gcOnMsg", gcOnMsg));
+            msgs.set("gcOffMsg", gcOffMsg = msgs.getString("gcOffMsg", gcOffMsg));
+
             msgs.set("gcOn", gcOn = msgs.getString("gcOn", gcOn));
             msgs.set("gcOff", gcOff = msgs.getString("gcOff", gcOff));
             msgs.set("scOn", scOn = msgs.getString("scOn", scOn));
             msgs.set("scOff", scOff = msgs.getString("scOff", scOff));
+
+
+            msgs.set("csOn", csOn = msgs.getString("csOn", csOn));
+            msgs.set("csOff", csOff = msgs.getString("csOff", csOff));
+            msgs.set("chatSpy", chatSpy = msgs.getString("chatSpy", chatSpy));
+
             msgs.set("noPermission", noPermission = msgs.getString("noPermission", noPermission));
+            msgs.set("noPlayer", noPlayer = msgs.getString("noPlayer", noPlayer));
             msgs.set("replyNoLast", replyNoLast = msgs.getString("replyNoLast", replyNoLast));
+
             msgs.set("usageReply", usageReply = msgs.getString("usageReply", usageReply));
             msgs.set("usageMsg", usageMsg = msgs.getString("usageMsg", usageMsg));
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
