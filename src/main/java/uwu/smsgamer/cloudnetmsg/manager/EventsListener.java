@@ -116,6 +116,8 @@ public class EventsListener implements Listener {
                     switch (args[0].toLowerCase()) {
                         case "yes":
                         case "on":
+                        case "enable":
+                        case "enabled":
                         case "true":
                             on = true;
                             break;
@@ -128,6 +130,37 @@ public class EventsListener implements Listener {
                         ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOffMsg, player.getName(), cmd)));
                     player.enableGCChat = on;
                     break;
+                }
+                case "chatspy": {
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.chatspy")) {
+                        if (args.length == 0) {
+                            if (player.enableChatSpy)
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.csOff, player.getName(), cmd)));
+                            else
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.csOn, player.getName(), cmd)));
+                            player.enableChatSpy = !player.enableChatSpy;
+                            break;
+                        }
+                        boolean on = false;
+                        switch (args[0].toLowerCase()) {
+                            case "yes":
+                            case "on":
+                            case "enable":
+                            case "enabled":
+                            case "true":
+                                on = true;
+                                break;
+                            case "toggle":
+                                on = !player.enableChatSpy;
+                        }
+                        if (on)
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.csOff, player.getName(), cmd)));
+                        else
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.csOn, player.getName(), cmd)));
+                        player.enableChatSpy = on;
+                        break;
+                    }
                 }
                 case "bc":
                 case "broadcast": {
@@ -200,6 +233,9 @@ public class EventsListener implements Listener {
                               JsonDocument.newDocument().append("message", StrU.messaging(Vars.toMSG, sender, receiver.getName(), msg))
                                 .append("receiver", receiver.getName()));
                     }
+                    for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers())
+                        if (PlayerManager.getPlayer(player).enableChatSpy)
+                            player.sendMessage(new TextComponent(StrU.messaging(Vars.chatSpy, sender, data.getString("receiver"), msg)));
                     break;
                 }
                 case "globalchat": {

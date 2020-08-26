@@ -17,6 +17,9 @@ public class Vars {
     public static String gcOff = "Global chat &cdisabled&r.";
     public static String scOn = "Staff chat &aenabled&r.";
     public static String scOff = "Staff chat &cdisabled&r.";
+    public static String csOn = "ChatSpy &aenabled&r.";
+    public static String csOff = "ChatSpy &cdisabled&r.";
+    public static String chatSpy = "&6Chat&eSpy&7>&r %sender%&r -> %receiver%&r %msg%";
 
     public static String noPermission = "&cYou do not have permission to execute that command.";
     public static String noPlayer = "&cThat player does not exist.";
@@ -27,6 +30,7 @@ public class Vars {
     public static File dataFolder;
 
     // calling it load yaml just encase we use json as well
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void loadYaml(File df) {
         try {
             dataFolder = df;

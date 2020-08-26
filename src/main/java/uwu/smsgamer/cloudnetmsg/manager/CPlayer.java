@@ -13,6 +13,7 @@ public class CPlayer { // TODO: 2020-08-23 Use MatrixPvPBase's shit w/ names cha
     public boolean enableSC = false; // staff chat for every msg
     public boolean enableGC = true; // global chat
     public boolean enableGCChat = false;  // global chat for every msg
+    public boolean enableChatSpy = false;  // chat spy UwU
 
     public CPlayer(CommandSender sender) {
         this.sender = sender;
