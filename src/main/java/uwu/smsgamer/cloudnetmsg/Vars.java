@@ -3,6 +3,7 @@ package uwu.smsgamer.cloudnetmsg;
 import net.md_5.bungee.config.*;
 
 import java.io.*;
+import java.lang.reflect.Field;
 
 public class Vars {
     public static String toMSG = "&b&lYOU&r -> %receiver%: &r%msg%";
@@ -29,6 +30,10 @@ public class Vars {
     public static String noPlayer = "&cThat player does not exist.";
     public static String replyNoLast = "&cNobody in last message.";
 
+    public static String joinAlert = "%sender% joined the game.";
+    public static String jaOn = "Join alerts &aenabled&r.";
+    public static String jaOff = "Join alerts &cdisabled&r.";
+
     public static String usageReply = "Replies to last player you messaged. Usage: /%cmd% (msg).";
     public static String usageMsg = "Messages someone. Can be on another sub server. Usage: /%cmd% (player) (msg).";
     public static File dataFolder;
@@ -50,7 +55,23 @@ public class Vars {
             // that variable (so if it doesn't exist, just defaults to itself)
             // and then sets that in the config (because if it doesn't exist,
             // then it won't save on disk, so we set it to that and then we save)
-            msgs.set("toMSG", toMSG = msgs.getString("toMSG", toMSG));
+
+            Class<Vars> clazz = Vars.class;
+
+            for(Field f : clazz.getDeclaredFields()) {
+                f.setAccessible(true);
+                if (!f.getType().equals(File.class)) {
+                    String name = f.getName();
+                    try {
+                        f.set(null, msgs.getString(name, (String) f.get(null)));
+                        msgs.set(name, f.get(null));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            /*msgs.set("toMSG", toMSG = msgs.getString("toMSG", toMSG));
             msgs.set("fromMSG", fromMSG = msgs.getString("fromMSG", fromMSG));
             msgs.set("disabledMSG", disabledMSG = msgs.getString("disabledMSG", disabledMSG));
 
@@ -71,12 +92,16 @@ public class Vars {
             msgs.set("csOff", csOff = msgs.getString("csOff", csOff));
             msgs.set("chatSpy", chatSpy = msgs.getString("chatSpy", chatSpy));
 
+            msgs.set("joinAlert", joinAlert = msgs.getString("joinAlert", joinAlert));
+            msgs.set("jaOn", jaOn = msgs.getString("jaOn", jaOn));
+            msgs.set("jaOff", jaOff = msgs.getString("jaOff", jaOff));
+
             msgs.set("noPermission", noPermission = msgs.getString("noPermission", noPermission));
             msgs.set("noPlayer", noPlayer = msgs.getString("noPlayer", noPlayer));
             msgs.set("replyNoLast", replyNoLast = msgs.getString("replyNoLast", replyNoLast));
 
             msgs.set("usageReply", usageReply = msgs.getString("usageReply", usageReply));
-            msgs.set("usageMsg", usageMsg = msgs.getString("usageMsg", usageMsg));
+            msgs.set("usageMsg", usageMsg = msgs.getString("usageMsg", usageMsg));*/
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
         } catch (IOException e) {
             e.printStackTrace();

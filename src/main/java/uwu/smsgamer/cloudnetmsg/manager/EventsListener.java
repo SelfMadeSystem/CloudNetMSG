@@ -54,15 +54,15 @@ public class EventsListener implements Listener {
                 case "r": {
                     event.setCancelled(true);
                     //if (player.sender.hasPermission("cloudnetmsg.commands.reply")) {
-                        if (args.length == 0) {
-                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageReply, player.getName(), cmd)));
-                            break;
-                        }
-                        if (player.lastMsg == null || player.lastMsg.isEmpty()) {
-                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.replyNoLast, player.getName(), cmd)));
-                            break;
-                        }
-                        player.sendMSG(player.lastMsg, rawArgs);
+                    if (args.length == 0) {
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageReply, player.getName(), cmd)));
+                        break;
+                    }
+                    if (player.lastMsg == null || player.lastMsg.isEmpty()) {
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.replyNoLast, player.getName(), cmd)));
+                        break;
+                    }
+                    player.sendMSG(player.lastMsg, rawArgs);
                     //}
                     break;
                 }
@@ -72,12 +72,12 @@ public class EventsListener implements Listener {
                 case "msg": {
                     event.setCancelled(true);
                     //if (player.sender.hasPermission("cloudnetmsg.commands.message")) {
-                        if (args.length <= 1) {
-                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageMsg, player.getName(), cmd)));
-                            break;
-                        }
-                        String rawArgs1 = rawArgs.substring(rawArgs.indexOf(" ") + 1);
-                        player.sendMSG(args[0], rawArgs1);
+                    if (args.length <= 1) {
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.usageMsg, player.getName(), cmd)));
+                        break;
+                    }
+                    String rawArgs1 = rawArgs.substring(rawArgs.indexOf(" ") + 1);
+                    player.sendMSG(args[0], rawArgs1);
                     //}
                     break;
                 }
@@ -85,16 +85,16 @@ public class EventsListener implements Listener {
                 case "globalchat": {
                     event.setCancelled(true);
                     //if (player.sender.hasPermission("cloudnetmsg.commands.globalchat")) {
-                        if (args.length == 0) {
-                            if (player.enableGC)
-                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOff, player.getName(), cmd)));
-                            else
-                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOn, player.getName(), cmd)));
-                            player.enableGC = !player.enableGC;
-                            break;
-                        }
-                        CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "globalchat",
-                          JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
+                    if (args.length == 0) {
+                        if (player.enableGC)
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOff, player.getName(), cmd)));
+                        else
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.gcOn, player.getName(), cmd)));
+                        player.enableGC = !player.enableGC;
+                        break;
+                    }
+                    CloudNetDriver.getInstance().getMessenger().sendChannelMessage("cloudnetmsg", "globalchat",
+                      JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
 //                        CloudNetDriver.getInstance().getEventManager().callEvent(
 //                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.GLOBAL_CHAT));
                     //}
@@ -160,7 +160,9 @@ public class EventsListener implements Listener {
                             ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.csOn, player.getName(), cmd)));
                         player.enableChatSpy = on;
                         break;
-                    }
+                    } else
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.noPermission, player.getName(), cmd)));
+                    break;
                 }
                 case "bc":
                 case "broadcast": {
@@ -178,7 +180,8 @@ public class EventsListener implements Listener {
                           JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
 //                        CloudNetDriver.getInstance().getEventManager().callEvent(
 //                          new MessageEvent(player.getName(), String.join(" ", args)));
-                    }
+                    } else
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.noPermission, player.getName(), cmd)));
                     break;
                 }
                 case "sc":
@@ -197,7 +200,42 @@ public class EventsListener implements Listener {
                           JsonDocument.newDocument().append("message", rawArgs).append("sender", player.getName()));
 //                        CloudNetDriver.getInstance().getEventManager().callEvent(
 //                          new MessageEvent(player.getName(), rawArgs, MessageEvent.Type.STAFF_CHAT));
-                    }
+                    } else
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.noPermission, player.getName(), cmd)));
+                    break;
+                }
+                case "joinalerts":
+                case "joinalert": {
+                    event.setCancelled(true);
+                    if (player.sender.hasPermission("cloudnetmsg.commands.joinalert")) {
+                        if (args.length == 0) {
+                            if (player.enableJA)
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.jaOff, player.getName(), cmd)));
+                            else
+                                ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.jaOn, player.getName(), cmd)));
+                            player.enableJA = !player.enableJA;
+                            break;
+                        }
+                        boolean on = false;
+                        switch (args[0].toLowerCase()) {
+                            case "yes":
+                            case "on":
+                            case "enable":
+                            case "enabled":
+                            case "true":
+                                on = true;
+                                break;
+                            case "toggle":
+                                on = !player.enableJA;
+                        }
+                        if (on)
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.jaOff, player.getName(), cmd)));
+                        else
+                            ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.jaOn, player.getName(), cmd)));
+                        player.enableJA = on;
+                        break;
+                    } else
+                        ((ProxiedPlayer) event.getSender()).sendMessage(new TextComponent(StrU.usage(Vars.noPermission, player.getName(), cmd)));
                     break;
                 }
             }
@@ -267,6 +305,9 @@ public class EventsListener implements Listener {
                     msg = msg.toLowerCase();
                     if (!PlayerManager.playerHashMap.containsKey(msg))
                         PlayerManager.otherPlayers.add(msg);
+                    for (CPlayer player : PlayerManager.playerHashMap.values())
+                        if (player.enableJA)
+                            player.sender.sendMessage(new TextComponent(StrU.messaging(Vars.broadcast, msg, "%receiver%", "%msg%")));
                     break;
                 }
                 case "pquit": {
@@ -276,7 +317,8 @@ public class EventsListener implements Listener {
                 }
                 case "msgplayer": {
                     CPlayer receiver = PlayerManager.getPlayer(data.getString("receiver"));
-                    receiver.sender.sendMessage(new TextComponent(msg));
+                    if (receiver != null)
+                        receiver.sender.sendMessage(new TextComponent(msg));
                     /*CPlayer sender = PlayerManager.getPlayer(data.getString("sender"));
                     if (sender != null)
                         sender.sender.sendMessage(new TextComponent(StrU.messaging(Vars.disabledMSG, sender.getName(), receiver, msg)));*/
